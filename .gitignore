@@ -1,4 +1,5 @@
-.idea/
-.git/
+/.idea
+/.idea/*
 test.py
 .DS_Store
+*/.DS_Store
