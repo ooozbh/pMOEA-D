@@ -1,5 +1,5 @@
 import random
-from copy import copy,deepcopy
+from copy import copy, deepcopy
 
 import PMOEAD
 import multiprocessing as mp
@@ -56,7 +56,6 @@ def Parallel(population, neighbours, z, obj, weight_vecotr, dimension, fitness, 
                 z[1] = i_obj[1]
             PMOEAD.update_neighbour(population, neighbours[index], indiviual, obj, fitness, weight_vecotr)
             index += 1
-        print(f'iteration {iteration}')
     # obj=[[frate,erate],,,,]
     return population, obj, fitness
 
@@ -82,7 +81,7 @@ def parallel_run(round, iteration_num, cpu_num, file_name, dimension, population
     population, weight_vecotr, neighbours, obj, z, fitness, data = Initial(population_size, dimension, file_name)
     workers = create_ParallelWorker(cpu_num)
     length = population_size // cpu_num
-    result = [[None for _ in range(3)] for _ in range(8)]
+    result = [[None for _ in range(3)] for _ in range(cpu_num)]
     while round > 0:
         for i in range(cpu_num):
             begin = length * i
@@ -90,13 +89,14 @@ def parallel_run(round, iteration_num, cpu_num, file_name, dimension, population
             if i == cpu_num:
                 end = population_size
             workers[i].inQ.put(
-                (deepcopy(population), neighbours, deepcopy(z), deepcopy(obj), weight_vecotr, dimension, deepcopy(fitness), iteration_num, begin, end, data))
+                (deepcopy(population), neighbours, deepcopy(z), deepcopy(obj), weight_vecotr, dimension,
+                 deepcopy(fitness), iteration_num, begin, end, data))
         # result[i][0] population , result[i][1] obj  The value of erate and frate
         # result[i][1] obj,[[frate,erate],[],,]
         for i in range(cpu_num):
             result[i][0], result[i][1], result[i][2] = workers[i].outQ.get()
         population, obj, fitness = combine_population(result, cpu_num, population_size)
-        print(f'round: {round}')
+        print(round)
         round -= 1
     finish_worker(workers)
     return population, obj
